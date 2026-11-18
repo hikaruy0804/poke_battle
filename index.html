@@ -2,100 +2,206 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="Pokémon Championsの対戦中にiPadで確認するためのバトルチェックリスト。">
-  <title>ポケモンバトルチェックリスト</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#080f17">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>30秒チェック</title>
   <style>
-    :root {
-      color-scheme: light;
-      --ink: #1a1a1a;
-      --blue: #0017c1;
-      --line: #d0d0d0;
-      --outline: #767676;
+    :root{
+      font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+      font-synthesis:none; -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%;
+      color:#f4f7fa; background:#080f17;
+      --panel:#101b28; --border:#273847; --muted:#97acb9;
+      --green:#c4f3af; --orange:#ffc77b; --red:#ff979b;
     }
-    * { box-sizing: border-box; }
-    html { -webkit-text-size-adjust: 100%; }
-    body {
-      margin: 0;
-      background: #ffffff;
-      color: var(--ink);
-      font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
-      font-size: 16px;
-      line-height: 1.5;
+    *,*:before,*:after{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden}
+    body{background:#080f17;overscroll-behavior:none}
+    button{font:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}
+    button:focus-visible{outline:3px solid #f5fbff;outline-offset:4px}
+    .layout{
+      width:100%;height:100%;height:100dvh;max-width:1800px;margin:0 auto;
+      display:grid;grid-template-columns:minmax(335px,.92fr) minmax(0,1.08fr);
+      gap:clamp(14px,2.3vw,28px);
+      padding:max(16px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));
     }
-    main {
-      max-width: 1184px;
-      margin: 0 auto;
-      padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+    .timer-pane{
+      min-width:0;min-height:0;display:flex;flex-direction:column;align-items:stretch;
+      justify-content:space-between;gap:10px;
+      padding:clamp(20px,2.3vw,34px);
+      border:1px solid #2a3d49;border-radius:26px;background:linear-gradient(154deg,#132432 0%,#0e1a26 74%);
     }
-    h1 {
-      margin: 0 0 20px;
-      padding-bottom: 12px;
-      border-bottom: 4px solid var(--blue);
-      font-size: clamp(26px, 3.2vw, 34px);
-      font-weight: 700;
-      line-height: 1.4;
+    .status{display:flex;align-items:center;gap:10px;min-height:25px;color:#9eafbd;font-size:clamp(14px,1.35vw,17px);font-weight:730;letter-spacing:.04em}
+    .dot{width:9px;height:9px;background:#6f8595;border-radius:50%;flex:none}
+    .running .dot{background:var(--green)}
+    .urgent .dot{background:var(--orange)}
+    .expired .dot{background:var(--red)}
+    .dial{
+      width:min(100%,33vw,43vh,380px);aspect-ratio:1;margin:0 auto;
+      position:relative;display:grid;place-items:center;
+      flex:0 1 auto;min-height:0;
     }
-    .groups {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 24px 32px;
-      align-items: stretch;
+    .dial svg{display:block;width:100%;height:100%;position:absolute;inset:0;transform:rotate(-90deg)}
+    .track{stroke:#29404c;stroke-width:10;fill:none}
+    .progress{stroke:var(--green);stroke-width:10;stroke-linecap:round;fill:none;transition:stroke .18s;}
+    .urgent .progress{stroke:var(--orange)}
+    .expired .progress{stroke:var(--red)}
+    .timebox{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transform:translateY(-1px)}
+    .time{font-weight:800;letter-spacing:-.085em;line-height:1;font-variant-numeric:tabular-nums;font-size:clamp(110px,13vw,171px);padding-right:.095em}
+    .subtime{color:var(--muted);font-size:clamp(13px,1.35vw,17px);font-weight:700;letter-spacing:.06em}
+    .expired .time{color:var(--red)}
+    .action{
+      flex:none;width:100%;min-height:clamp(81px,11.7vh,108px);border:0;border-radius:19px;
+      padding:14px 19px;display:flex;align-items:center;justify-content:center;gap:14px;
+      color:#10291c;background:var(--green);font-size:clamp(23px,2.4vw,32px);font-weight:830;
+      box-shadow:0 5px 0 #658c69;
     }
-    .group {
-      margin: 0;
-      padding: 10px 20px 10px 40px;
-      border: 1px solid var(--outline);
-      border-radius: 8px;
-      background: #ffffff;
+    .action:active{transform:translateY(3px);box-shadow:0 2px 0 #658c69}
+    .running .action{background:#edf2f5;color:#11212f;box-shadow:0 5px 0 #889aa3}
+    .running .action:active{box-shadow:0 2px 0 #889aa3}
+    .urgent .action{background:var(--orange);color:#35220b;box-shadow:0 5px 0 #9d723e}
+    .urgent .action:active{box-shadow:0 2px 0 #9d723e}
+    .expired .action{background:#ffe1df;color:#432025;box-shadow:0 5px 0 #aa7b7e}
+    .expired .action:active{box-shadow:0 2px 0 #aa7b7e}
+    .action-icon{font-size:32px;line-height:1;font-weight:700;flex-shrink:0}
+    .checks{min-width:0;min-height:0;display:flex;flex-direction:column;gap:clamp(10px,1.65vh,17px)}
+    .check-title{color:#a5bac6;font-size:clamp(14px,1.35vw,18px);font-weight:730;min-height:25px;display:flex;align-items:center;padding-left:8px}
+    .check{
+      min-height:0;flex:1;display:flex;align-items:center;gap:clamp(15px,2.1vw,25px);
+      padding:clamp(16px,2.4vw,30px);border:1px solid var(--border);
+      border-radius:21px;background:#111f2b;
     }
-    .group li {
-      margin: 0;
-      padding: 9px 0 10px 2px;
-      border-bottom: 1px solid var(--line);
-      font-size: 17px;
-      line-height: 1.5;
+    .number{font-size:clamp(18px,1.7vw,22px);font-variant-numeric:tabular-nums;font-weight:780;color:#7b9bad;align-self:center;flex:none}
+    .copy{min-width:0;display:flex;flex-direction:column;gap:clamp(5px,.8vh,10px)}
+    .question{font-size:clamp(25px,2.8vw,37px);font-weight:810;line-height:1.24;letter-spacing:-.04em;word-break:keep-all}
+    .examples{color:#a2b6c2;font-size:clamp(14px,1.5vw,19px);font-weight:560;line-height:1.5;word-break:keep-all}
+    .running .check{border-color:#38505e}
+    .urgent .check{background:#1d2932;border-color:#66533b}
+    .urgent .check-title{color:var(--orange)}
+    .expired .check-title{color:#ffadb0}
+    @media(max-height:675px) and (min-width:800px){
+      .layout{padding-top:12px;padding-bottom:12px;gap:14px}
+      .timer-pane{padding:16px 24px;border-radius:20px;gap:5px}
+      .dial{width:min(100%,28vw,43vh,300px)}
+      .time{font-size:clamp(94px,11.6vw,132px)}
+      .check{padding:13px 22px;border-radius:16px}
+      .checks{gap:8px}
+      .question{font-size:clamp(23px,2.5vw,30px)}
+      .examples{font-size:clamp(13px,1.3vw,16px)}
+      .action{min-height:67px;border-radius:13px;font-size:23px}
     }
-    .group li:last-child { border-bottom: 0; }
-    .group li::marker { color: var(--blue); }
-    @media (max-width: 680px) {
-      main { padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
-      h1 { margin-bottom: 16px; }
-      .groups { grid-template-columns: 1fr; gap: 16px; }
-      .group li { font-size: 16px; }
+    @media(max-width:790px){
+      html,body{height:auto;overflow:auto}
+      .layout{min-height:100dvh;height:auto;grid-template-columns:1fr;padding:12px;gap:10px}
+      .timer-pane{min-height:400px;gap:12px}
+      .dial{width:min(58vw,45vh,300px)}
+      .checks{gap:10px}
+      .check{min-height:110px}
+      .question{font-size:25px}
     }
+    @media(prefers-reduced-motion:reduce){.progress{transition:none}}
   </style>
 </head>
 <body>
-  <main>
-    <h1>ポケモンバトルチェックリスト</h1>
-    <div class="groups">
-      <ul class="group">
-        <li>天候・フィールドの残りターン</li>
-        <li>おいかぜ・トリックルームの残りターン</li>
-        <li>壁・継続効果の残りターン</li>
-        <li>場の効果、状態異常・能力ランク</li>
-      </ul>
-      <ul class="group">
-        <li>与ダメージ・被ダメージ</li>
-        <li>相手が使った技と行動順</li>
-        <li>自分・相手の交代履歴</li>
-        <li>判明した持ち物・特性、消費済みの持ち物、メガシンカ</li>
-      </ul>
-      <ul class="group">
-        <li>まもる・先制技の可能性</li>
-        <li>誘導・ガードの可能性</li>
-        <li>素早さ操作・妨害の可能性</li>
-        <li>積み・回復、未公開の攻撃技・範囲技の可能性</li>
-      </ul>
-      <ul class="group">
-        <li>スカーフ・タスキの可能性</li>
-        <li>半減実・回復・火力強化・妨害対策の可能性</li>
-        <li>無効化・吸収、交代時に発動する特性の可能性</li>
-        <li>未登場ポケモン、交代先、集中攻撃の可能性</li>
-      </ul>
-    </div>
+  <main class="layout ready" id="layout">
+    <section class="timer-pane" aria-label="30秒の自主タイマー">
+      <div class="status" aria-live="polite"><span class="dot" aria-hidden="true"></span><span id="status">待機中</span></div>
+      <div class="dial" aria-label="残り時間">
+        <svg viewBox="0 0 300 300" aria-hidden="true" focusable="false">
+          <circle class="track" cx="150" cy="150" r="135"></circle>
+          <circle class="progress" id="progress" cx="150" cy="150" r="135"></circle>
+        </svg>
+        <div class="timebox">
+          <span class="time" id="time">30</span>
+          <span class="subtime" id="subtime">秒・自主タイマー</span>
+        </div>
+      </div>
+      <button class="action" id="action" type="button"><span class="action-icon" id="action-icon" aria-hidden="true">▶</span><span id="action-text">ターン開始</span></button>
+    </section>
+    <section class="checks" aria-label="技を押す前の確認">
+      <div class="check-title">技を確定する前に</div>
+      <div class="check"><span class="number">01</span><div class="copy"><div class="question">相手は止められる？</div><div class="examples">ねこだまし・まもる・交代</div></div></div>
+      <div class="check"><span class="number">02</span><div class="copy"><div class="question">技は今、通る？</div><div class="examples">フィールド・天候・技の対象</div></div></div>
+      <div class="check"><span class="number">03</span><div class="copy"><div class="question">本当に先に動ける？</div><div class="examples">トリックルーム・おいかぜ・優先度</div></div></div>
+    </section>
   </main>
+  <script>
+    (() => {
+      'use strict';
+      const SECONDS = 30;
+      const RADIUS = 135;
+      const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+      const root = document.getElementById('layout');
+      const button = document.getElementById('action');
+      const buttonText = document.getElementById('action-text');
+      const buttonIcon = document.getElementById('action-icon');
+      const status = document.getElementById('status');
+      const time = document.getElementById('time');
+      const subtime = document.getElementById('subtime');
+      const progress = document.getElementById('progress');
+      let phase = 'ready';
+      let deadline = 0;
+      let handle = null;
+      progress.style.strokeDasharray = CIRCUMFERENCE;
+      function updateClasses(next) {
+        root.classList.remove('ready','running','urgent','expired');
+        root.classList.add(next);
+      }
+      function renderReady() {
+        phase = 'ready';
+        clearInterval(handle); handle = null;
+        updateClasses('ready');
+        status.textContent = '待機中';
+        time.textContent = '30';
+        subtime.textContent = '秒・自主タイマー';
+        progress.style.strokeDashoffset = '0';
+        buttonText.textContent = 'ターン開始';
+        buttonIcon.textContent = '▶';
+        button.setAttribute('aria-label','30秒の確認タイマーを開始する');
+      }
+      function renderRunning() {
+        if (phase !== 'running') return;
+        // 端末が一時停止しても表示がずれないよう、常に開始時刻から残り時間を求める。
+        const milliseconds = Math.max(0, deadline - Date.now());
+        const remaining = milliseconds / 1000;
+        const shown = Math.ceil(remaining);
+        time.textContent = String(shown).padStart(2,'0');
+        progress.style.strokeDashoffset = String(CIRCUMFERENCE * (1 - remaining / SECONDS));
+        if (milliseconds <= 0) {
+          phase = 'expired';
+          clearInterval(handle); handle = null;
+          updateClasses('expired');
+          status.textContent = '30秒経過';
+          subtime.textContent = '確認して終了';
+          return;
+        }
+        if (remaining <= 10) {
+          updateClasses('urgent');
+          status.textContent = '確認を忘れずに';
+        } else {
+          updateClasses('running');
+          status.textContent = '技を検討中';
+        }
+      }
+      button.addEventListener('click', () => {
+        if (phase === 'ready') {
+          phase = 'running';
+          deadline = Date.now() + SECONDS * 1000;
+          buttonText.textContent = '確認完了 → 次へ';
+          buttonIcon.textContent = '✓';
+          button.setAttribute('aria-label','3項目を確認して、このターンを終了する');
+          renderRunning();
+          handle = setInterval(renderRunning, 100);
+        } else {
+          renderReady();
+        }
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) renderRunning();
+      });
+      renderReady();
+    })();
+  </script>
 </body>
 </html>
