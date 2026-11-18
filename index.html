@@ -111,27 +111,31 @@
   </style>
 </head>
 <body>
-  <main class="layout ready" id="layout">
-    <section class="timer-pane" aria-label="30秒の自主タイマー">
-      <div class="status" aria-live="polite"><span class="dot" aria-hidden="true"></span><span id="status">待機中</span></div>
-      <div class="dial" aria-label="残り時間">
-        <svg viewBox="0 0 300 300" aria-hidden="true" focusable="false">
-          <circle class="track" cx="150" cy="150" r="135"></circle>
-          <circle class="progress" id="progress" cx="150" cy="150" r="135"></circle>
-        </svg>
-        <div class="timebox">
-          <span class="time" id="time">30</span>
-          <span class="subtime" id="subtime">秒・自主タイマー</span>
-        </div>
-      </div>
-      <button class="action" id="action" type="button"><span class="action-icon" id="action-icon" aria-hidden="true">▶</span><span id="action-text">ターン開始</span></button>
-    </section>
-    <section class="checks" aria-label="技を押す前の確認">
-      <div class="check-title">技を確定する前に</div>
-      <div class="check"><span class="number">01</span><div class="copy"><div class="question">相手は止められる？</div><div class="examples">ねこだまし・まもる・交代</div></div></div>
-      <div class="check"><span class="number">02</span><div class="copy"><div class="question">技は今、通る？</div><div class="examples">フィールド・天候・技の対象</div></div></div>
-      <div class="check"><span class="number">03</span><div class="copy"><div class="question">本当に先に動ける？</div><div class="examples">トリックルーム・おいかぜ・優先度</div></div></div>
-    </section>
+  <main class="screen" id="screen" aria-label="技の選択前に3つ確認する">
+    <button class="check" type="button" aria-pressed="false">
+      <span class="number" aria-hidden="true">01</span>
+      <span class="copy">
+        <span class="question">相手から止められないか？</span>
+        <span class="hint">ねこだまし・まもる・交代</span>
+      </span>
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>
+    </button>
+    <button class="check" type="button" aria-pressed="false">
+      <span class="number" aria-hidden="true">02</span>
+      <span class="copy">
+        <span class="question">技は今、通る？</span>
+        <span class="hint">フィールド・天候・技の対象</span>
+      </span>
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>
+    </button>
+    <button class="check" type="button" aria-pressed="false">
+      <span class="number" aria-hidden="true">03</span>
+      <span class="copy">
+        <span class="question">本当に先に動ける？</span>
+        <span class="hint">トリックルーム・おいかぜ・優先度</span>
+      </span>
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg></span>
+    </button>
   </main>
   <script>
     (() => {
