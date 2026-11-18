@@ -2,105 +2,112 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-  <meta name="theme-color" content="#080f17">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#081019">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>30秒チェック</title>
+  <title>バトル確認</title>
   <style>
-    :root{
-      font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
-      font-synthesis:none; -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%;
-      color:#f4f7fa; background:#080f17;
-      --panel:#101b28; --border:#273847; --muted:#97acb9;
-      --green:#c4f3af; --orange:#ffc77b; --red:#ff979b;
+    :root {
+      color-scheme: dark;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      font-synthesis: none;
+      -webkit-font-smoothing: antialiased;
+      -webkit-text-size-adjust: 100%;
+      --bg: #081019;
+      --card: #13212e;
+      --border: #294151;
+      --text: #f3f8fc;
+      --sub: #a8bdc9;
+      --accent: #bbf2b0;
     }
-    *,*:before,*:after{box-sizing:border-box}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden}
-    body{background:#080f17;overscroll-behavior:none}
-    button{font:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}
-    button:focus-visible{outline:3px solid #f5fbff;outline-offset:4px}
-    .layout{
-      width:100%;height:100%;height:100dvh;max-width:1800px;margin:0 auto;
-      display:grid;grid-template-columns:minmax(335px,.92fr) minmax(0,1.08fr);
-      gap:clamp(14px,2.3vw,28px);
-      padding:max(16px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { background: var(--bg); color: var(--text); overscroll-behavior: none; }
+    button { font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    button:focus-visible { outline: 4px solid #e4faff; outline-offset: -7px; }
+    .screen {
+      height: 100vh;
+      height: 100dvh;
+      width: 100%;
+      max-width: 1800px;
+      margin-inline: auto;
+      padding: max(16px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+      display: grid;
+      grid-template-rows: repeat(3, minmax(0,1fr));
+      gap: clamp(12px, 2vh, 22px);
     }
-    .timer-pane{
-      min-width:0;min-height:0;display:flex;flex-direction:column;align-items:stretch;
-      justify-content:space-between;gap:10px;
-      padding:clamp(20px,2.3vw,34px);
-      border:1px solid #2a3d49;border-radius:26px;background:linear-gradient(154deg,#132432 0%,#0e1a26 74%);
+    .check {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      min-height: 0;
+      padding: clamp(20px, 3.5vw, 50px);
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      text-align: left;
+      color: var(--text);
+      gap: clamp(16px, 3vw, 40px);
+      transition: background .12s ease, border-color .12s ease, transform .1s ease;
     }
-    .status{display:flex;align-items:center;gap:10px;min-height:25px;color:#9eafbd;font-size:clamp(14px,1.35vw,17px);font-weight:730;letter-spacing:.04em}
-    .dot{width:9px;height:9px;background:#6f8595;border-radius:50%;flex:none}
-    .running .dot{background:var(--green)}
-    .urgent .dot{background:var(--orange)}
-    .expired .dot{background:var(--red)}
-    .dial{
-      width:min(100%,33vw,43vh,380px);aspect-ratio:1;margin:0 auto;
-      position:relative;display:grid;place-items:center;
-      flex:0 1 auto;min-height:0;
+    .check:active { transform: scale(.996); }
+    .check[aria-pressed="true"] { background: #193c35; border-color: #88dfaa; }
+    .number {
+      font-size: clamp(27px, 3vw, 42px);
+      font-weight: 800;
+      letter-spacing: -.05em;
+      color: #7093a7;
+      flex: none;
+      font-variant-numeric: tabular-nums;
     }
-    .dial svg{display:block;width:100%;height:100%;position:absolute;inset:0;transform:rotate(-90deg)}
-    .track{stroke:#29404c;stroke-width:10;fill:none}
-    .progress{stroke:var(--green);stroke-width:10;stroke-linecap:round;fill:none;transition:stroke .18s;}
-    .urgent .progress{stroke:var(--orange)}
-    .expired .progress{stroke:var(--red)}
-    .timebox{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transform:translateY(-1px)}
-    .time{font-weight:800;letter-spacing:-.085em;line-height:1;font-variant-numeric:tabular-nums;font-size:clamp(110px,13vw,171px);padding-right:.095em}
-    .subtime{color:var(--muted);font-size:clamp(13px,1.35vw,17px);font-weight:700;letter-spacing:.06em}
-    .expired .time{color:var(--red)}
-    .action{
-      flex:none;width:100%;min-height:clamp(81px,11.7vh,108px);border:0;border-radius:19px;
-      padding:14px 19px;display:flex;align-items:center;justify-content:center;gap:14px;
-      color:#10291c;background:var(--green);font-size:clamp(23px,2.4vw,32px);font-weight:830;
-      box-shadow:0 5px 0 #658c69;
+    .check[aria-pressed="true"] .number { color: #8bdca7; }
+    .copy { display: flex; flex-direction: column; gap: clamp(6px, 1.3vh, 13px); min-width: 0; flex: 1; }
+    .question {
+      font-weight: 850;
+      letter-spacing: -.04em;
+      font-size: clamp(28px, 3.3vw, 49px);
+      line-height: 1.25;
+      word-break: keep-all;
     }
-    .action:active{transform:translateY(3px);box-shadow:0 2px 0 #658c69}
-    .running .action{background:#edf2f5;color:#11212f;box-shadow:0 5px 0 #889aa3}
-    .running .action:active{box-shadow:0 2px 0 #889aa3}
-    .urgent .action{background:var(--orange);color:#35220b;box-shadow:0 5px 0 #9d723e}
-    .urgent .action:active{box-shadow:0 2px 0 #9d723e}
-    .expired .action{background:#ffe1df;color:#432025;box-shadow:0 5px 0 #aa7b7e}
-    .expired .action:active{box-shadow:0 2px 0 #aa7b7e}
-    .action-icon{font-size:32px;line-height:1;font-weight:700;flex-shrink:0}
-    .checks{min-width:0;min-height:0;display:flex;flex-direction:column;gap:clamp(10px,1.65vh,17px)}
-    .check-title{color:#a5bac6;font-size:clamp(14px,1.35vw,18px);font-weight:730;min-height:25px;display:flex;align-items:center;padding-left:8px}
-    .check{
-      min-height:0;flex:1;display:flex;align-items:center;gap:clamp(15px,2.1vw,25px);
-      padding:clamp(16px,2.4vw,30px);border:1px solid var(--border);
-      border-radius:21px;background:#111f2b;
+    .hint {
+      color: var(--sub);
+      font-size: clamp(16px, 1.75vw, 23px);
+      font-weight: 570;
+      line-height: 1.4;
+      word-break: keep-all;
     }
-    .number{font-size:clamp(18px,1.7vw,22px);font-variant-numeric:tabular-nums;font-weight:780;color:#7b9bad;align-self:center;flex:none}
-    .copy{min-width:0;display:flex;flex-direction:column;gap:clamp(5px,.8vh,10px)}
-    .question{font-size:clamp(25px,2.8vw,37px);font-weight:810;line-height:1.24;letter-spacing:-.04em;word-break:keep-all}
-    .examples{color:#a2b6c2;font-size:clamp(14px,1.5vw,19px);font-weight:560;line-height:1.5;word-break:keep-all}
-    .running .check{border-color:#38505e}
-    .urgent .check{background:#1d2932;border-color:#66533b}
-    .urgent .check-title{color:var(--orange)}
-    .expired .check-title{color:#ffadb0}
-    @media(max-height:675px) and (min-width:800px){
-      .layout{padding-top:12px;padding-bottom:12px;gap:14px}
-      .timer-pane{padding:16px 24px;border-radius:20px;gap:5px}
-      .dial{width:min(100%,28vw,43vh,300px)}
-      .time{font-size:clamp(94px,11.6vw,132px)}
-      .check{padding:13px 22px;border-radius:16px}
-      .checks{gap:8px}
-      .question{font-size:clamp(23px,2.5vw,30px)}
-      .examples{font-size:clamp(13px,1.3vw,16px)}
-      .action{min-height:67px;border-radius:13px;font-size:23px}
+    .check[aria-pressed="true"] .hint { color: #b7d5c9; }
+    .mark {
+      width: clamp(42px, 5.8vw, 76px);
+      height: clamp(42px, 5.8vw, 76px);
+      border-radius: 50%;
+      border: 2px solid #4b6474;
+      display: grid;
+      place-items: center;
+      flex: none;
+      color: transparent;
     }
-    @media(max-width:790px){
-      html,body{height:auto;overflow:auto}
-      .layout{min-height:100dvh;height:auto;grid-template-columns:1fr;padding:12px;gap:10px}
-      .timer-pane{min-height:400px;gap:12px}
-      .dial{width:min(58vw,45vh,300px)}
-      .checks{gap:10px}
-      .check{min-height:110px}
-      .question{font-size:25px}
+    .mark svg { width: 54%; height: 54%; }
+    .check[aria-pressed="true"] .mark { border-color: var(--accent); background: var(--accent); color: #143125; }
+    .screen.completed .check { background: #204a3d; border-color: var(--accent); }
+    @media (max-height: 670px) and (min-width: 790px) {
+      .screen { padding-top: 12px; padding-bottom: 12px; gap: 10px; }
+      .check { padding: 15px 28px; border-radius: 18px; }
+      .question { font-size: clamp(26px, 3vw, 39px); }
+      .hint { font-size: clamp(15px, 1.6vw, 21px); }
     }
-    @media(prefers-reduced-motion:reduce){.progress{transition:none}}
+    @media (max-width: 790px) and (orientation: portrait) {
+      .screen { padding: 12px; gap: 10px; }
+      .check { padding: 14px 18px; gap: 13px; border-radius: 17px; }
+      .number { font-size: 23px; }
+      .question { font-size: clamp(20px, 4vw, 30px); }
+      .hint { font-size: clamp(12px, 2.5vw, 17px); }
+      .mark { width: 36px; height: 36px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .check { transition: none; } }
   </style>
 </head>
 <body>
@@ -121,7 +128,7 @@
     </section>
     <section class="checks" aria-label="技を押す前の確認">
       <div class="check-title">技を確定する前に</div>
-      <div class="check"><span class="number">01</span><div class="copy"><div class="question">相手から止められない？</div><div class="examples">ねこだまし・まもる・交代</div></div></div>
+      <div class="check"><span class="number">01</span><div class="copy"><div class="question">相手は止められる？</div><div class="examples">ねこだまし・まもる・交代</div></div></div>
       <div class="check"><span class="number">02</span><div class="copy"><div class="question">技は今、通る？</div><div class="examples">フィールド・天候・技の対象</div></div></div>
       <div class="check"><span class="number">03</span><div class="copy"><div class="question">本当に先に動ける？</div><div class="examples">トリックルーム・おいかぜ・優先度</div></div></div>
     </section>
@@ -129,78 +136,26 @@
   <script>
     (() => {
       'use strict';
-      const SECONDS = 30;
-      const RADIUS = 135;
-      const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-      const root = document.getElementById('layout');
-      const button = document.getElementById('action');
-      const buttonText = document.getElementById('action-text');
-      const buttonIcon = document.getElementById('action-icon');
-      const status = document.getElementById('status');
-      const time = document.getElementById('time');
-      const subtime = document.getElementById('subtime');
-      const progress = document.getElementById('progress');
-      let phase = 'ready';
-      let deadline = 0;
-      let handle = null;
-      progress.style.strokeDasharray = CIRCUMFERENCE;
-      function updateClasses(next) {
-        root.classList.remove('ready','running','urgent','expired');
-        root.classList.add(next);
+      const screen = document.getElementById('screen');
+      const checks = [...document.querySelectorAll('.check')];
+      let resetHandle = null;
+      function reset() {
+        clearTimeout(resetHandle);
+        resetHandle = null;
+        screen.classList.remove('completed');
+        for (const check of checks) check.setAttribute('aria-pressed','false');
       }
-      function renderReady() {
-        phase = 'ready';
-        clearInterval(handle); handle = null;
-        updateClasses('ready');
-        status.textContent = '待機中';
-        time.textContent = '30';
-        subtime.textContent = '秒・自主タイマー';
-        progress.style.strokeDashoffset = '0';
-        buttonText.textContent = 'ターン開始';
-        buttonIcon.textContent = '▶';
-        button.setAttribute('aria-label','30秒の確認タイマーを開始する');
+      for (const check of checks) {
+        check.addEventListener('click', () => {
+          if (resetHandle !== null) return;
+          check.setAttribute('aria-pressed', check.getAttribute('aria-pressed') !== 'true' ? 'true' : 'false');
+          if (checks.every(x => x.getAttribute('aria-pressed') === 'true')) {
+            screen.classList.add('completed');
+            // 全項目を確認したことを一瞬表示し、次のターンへ自動的に戻す。
+            resetHandle = setTimeout(reset, 650);
+          }
+        });
       }
-      function renderRunning() {
-        if (phase !== 'running') return;
-        // 端末が一時停止しても表示がずれないよう、常に開始時刻から残り時間を求める。
-        const milliseconds = Math.max(0, deadline - Date.now());
-        const remaining = milliseconds / 1000;
-        const shown = Math.ceil(remaining);
-        time.textContent = String(shown).padStart(2,'0');
-        progress.style.strokeDashoffset = String(CIRCUMFERENCE * (1 - remaining / SECONDS));
-        if (milliseconds <= 0) {
-          phase = 'expired';
-          clearInterval(handle); handle = null;
-          updateClasses('expired');
-          status.textContent = '30秒経過';
-          subtime.textContent = '確認して終了';
-          return;
-        }
-        if (remaining <= 10) {
-          updateClasses('urgent');
-          status.textContent = '確認を忘れずに';
-        } else {
-          updateClasses('running');
-          status.textContent = '技を検討中';
-        }
-      }
-      button.addEventListener('click', () => {
-        if (phase === 'ready') {
-          phase = 'running';
-          deadline = Date.now() + SECONDS * 1000;
-          buttonText.textContent = '確認完了 → 次へ';
-          buttonIcon.textContent = '✓';
-          button.setAttribute('aria-label','3項目を確認して、このターンを終了する');
-          renderRunning();
-          handle = setInterval(renderRunning, 100);
-        } else {
-          renderReady();
-        }
-      });
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) renderRunning();
-      });
-      renderReady();
     })();
   </script>
 </body>
